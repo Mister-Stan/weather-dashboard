@@ -31,9 +31,8 @@ function loadCityHistory() {
     const city = cityHistory[i];
     // historySection.appendChild(button);
     historySectionContent += `<button class="btn btn-secondary text-center mb-3" onclick="searchCity('${city}')">${city}</button>`;
-
-  } 
-   historySection.innerHTML = historySectionContent; 
+  }
+  historySection.innerHTML = historySectionContent;
 }
 loadCityHistory();
 
@@ -50,7 +49,7 @@ function searchCity(cityName) {
       const lat = response.coord.lat;
       const lon = response.coord.lon;
       getWeatherData(lat, lon, cityName);
-      } else {
+    } else {
       console.log("City not found");
     }
   });
@@ -60,31 +59,23 @@ function searchCity(cityName) {
 function getWeatherData(lat, lon, cityName) {
   // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${myAPIKey}`;
   const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${myAPIKey}`;
-  
+
   $.ajax({
     method: "GET",
     url: url,
   }).then(function (response) {
     if (response.cod == 200) {
-      updateWeather(response);
+      updateCityWeather(response);
       loadCityHistory();
       // console.log(response);
     } else {
       console.log("Unable to get weather data!");
     }
   });
-
-  // updates the city history in local storage by adding the new city name to the start of the array
-  let cityHistory = JSON.parse(localStorage.getItem("cityHistory")) || [];
-  cityHistory.unshift(cityName);
-  // checks that only 5 most recent city names are stored
-  if (cityHistory.length > 6) cityHistory.pop();
-  // stores the updated city history in localStorage
-  localStorage.setItem("cityHistory", JSON.stringify(cityHistory));
 }
 
 // function that updates the weather
-function updateWeather(data) {
+function updateCityWeather(data) {
   const cityName = data.city.name;
   // creates an object to get the current date and time
   const date = new Date();
@@ -103,8 +94,20 @@ function updateWeather(data) {
         <p>Humidity: ${humidity}%</p>
         <p>Wind Speed: ${windSpeed} m/s</p>
     `;
-}
 
+  // updates the city history in local storage by adding the new city name to the start of the array
+  let cityHistory = JSON.parse(localStorage.getItem("cityHistory")) || [];
+
+  if (cityHistory.indexOf(cityName) == -1) {
+    cityHistory.unshift(cityName);
+  }
+  // checks that only 5 most recent city names are stored
+  if (cityHistory.length > 6) {
+    cityHistory.pop();
+  }
+  // stores the updated city history in localStorage
+  localStorage.setItem("cityHistory", JSON.stringify(cityHistory));
+}
 
 
 // function that gets the coordinates from the api
