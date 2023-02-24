@@ -56,8 +56,7 @@ function searchCity(cityName) {
 }
 
 // function that gets the weather data
-function getWeatherData(lat, lon, cityName) {
-  // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${myAPIKey}`;
+function getWeatherData(lat, lon) {
   const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${myAPIKey}`;
 
   $.ajax({
@@ -67,15 +66,15 @@ function getWeatherData(lat, lon, cityName) {
     if (response.cod == 200) {
       updateCityWeather(response);
       loadCityHistory();
-      // console.log(response);
     } else {
       console.log("Unable to get weather data!");
     }
   });
 }
 
-// function that updates the weather
+// function that updates the 5 days forecast for the searched cities
 function updateCityWeather(data) {
+  console.log(data);
   const cityName = data.city.name;
   // creates an object to get the current date and time
   const date = new Date();
@@ -86,29 +85,100 @@ function updateCityWeather(data) {
   const windSpeed = data.list[0].wind.speed;
 
   const todayForecast = document.querySelector("#today");
-  // updates the HTML content of the today section with the weather data
+
+  // updates dinamically the HTML content  with the weather data
   todayForecast.innerHTML = `
-        <h2>${cityName} (${date.toLocaleDateString()})</h2>
-        <img src = "${iconUrl}" alt = "${cityName}">
-        <p>Temperature: ${temp} &#8451;</p>
-        <p>Humidity: ${humidity}%</p>
-        <p>Wind Speed: ${windSpeed} m/s</p>
-    `;
+        <div class="w-100 border p-3">
+          <h2>${cityName} (${date.toLocaleDateString()})</h2>
+          <img src = "${iconUrl}" alt = "${cityName}">
+          <p>Temperature: ${temp} &#8451;</p>
+          <p>Wind Speed: ${windSpeed} KPH </p>
+          <p>Humidity: ${humidity} %</p>
+        </div>
+      `;
+
+  const daysForecast = document.querySelector("#forecast");
+  daysForecast.innerHTML = `
+    <div class="w-100 p-3">
+      <h2 class="">5-Day Forecast:</h2>
+    </div>
+
+    <div class="col text-white ">
+      <div class="bg-dark me-3 p-3">
+        <h3>${moment(data.list[5].dt_txt).format("DD/MM/YYYY")}</h3>
+        <img src = "https://openweathermap.org/img/w/${
+          data.list[5].weather[0].icon
+        }.png" alt="${moment(data.list[5].dt_txt).format("DD/MM/YYYY")}">
+        <p>Temp: ${(data.list[5].main.temp - 273.15).toFixed(2)} &#8451;</p>
+        <p>Wind: ${data.list[5].wind.speed} KPH </p>
+        <p>Humidity: ${data.list[5].main.humidity} %</p>
+      </div>
+    </div>
+
+    <div class="col text-white ">
+      <div class="bg-dark me-3 p-3">
+        <h3>${moment(data.list[13].dt_txt).format("DD/MM/YYYY")}</h3>
+        <img src = "https://openweathermap.org/img/w/${
+          data.list[13].weather[0].icon
+        }.png" alt="${moment(data.list[13].dt_txt).format("DD/MM/YYYY")}">
+        <p>Temp: ${(data.list[13].main.temp - 273.15).toFixed(2)} &#8451;</p>
+        <p>Wind: ${data.list[13].wind.speed} KPH </p>
+        <p>Humidity: ${data.list[13].main.humidity} %</p>
+      </div>
+    </div>
+
+    <div class="col text-white ">
+      <div class="bg-dark me-3 p-3">
+        <h3>${moment(data.list[21].dt_txt).format("DD/MM/YYYY")}</h3>
+        <img src = "https://openweathermap.org/img/w/${
+          data.list[21].weather[0].icon
+        }.png" alt="${moment(data.list[21].dt_txt).format("DD/MM/YYYY")}">
+        <p>Temp: ${(data.list[21].main.temp - 273.15).toFixed(2)} &#8451;</p>
+        <p>Wind: ${data.list[21].wind.speed} KPH </p>
+        <p>Humidity: ${data.list[21].main.humidity} %</p>
+      </div>
+    </div>
+
+    <div class="col text-white ">
+      <div class="bg-dark me-3 p-3">
+        <h3>${moment(data.list[29].dt_txt).format("DD/MM/YYYY")}</h3>
+        <img src = "https://openweathermap.org/img/w/${
+          data.list[29].weather[0].icon
+        }.png" alt="${moment(data.list[29].dt_txt).format("DD/MM/YYYY")}">
+        <p>Temp: ${(data.list[29].main.temp - 273.15).toFixed(2)} &#8451;</p>
+        <p>Wind: ${data.list[29].wind.speed} KPH </p>
+        <p>Humidity: ${data.list[29].main.humidity} %</p>
+      </div>
+    </div>
+      
+    <div class="col text-white ">
+      <div class="bg-dark me-3 p-3">
+        <h3>${moment(data.list[37].dt_txt).format("DD/MM/YYYY")}</h3>
+        <img src = "https://openweathermap.org/img/w/${
+          data.list[37].weather[0].icon
+        }.png" alt="${moment(data.list[37].dt_txt).format("DD/MM/YYYY")}">
+        <p>Temp: ${(data.list[37].main.temp - 273.15).toFixed(2)} &#8451;</p>
+        <p>Wind: ${data.list[37].wind.speed} KPH </p>
+        <p>Humidity: ${data.list[37].main.humidity} %</p>
+      </div>
+    </div>
+  `;
 
   // updates the city history in local storage by adding the new city name to the start of the array
   let cityHistory = JSON.parse(localStorage.getItem("cityHistory")) || [];
 
+  //checks if the city searched is not found in the searched cities array
   if (cityHistory.indexOf(cityName) == -1) {
     cityHistory.unshift(cityName);
-  }
-  // checks that only 5 most recent city names are stored
-  if (cityHistory.length > 6) {
-    cityHistory.pop();
-  }
-  // stores the updated city history in localStorage
-  localStorage.setItem("cityHistory", JSON.stringify(cityHistory));
-}
 
+    // checks that only 5 most recent city names are stored
+    if (cityHistory.length > 6) {
+      cityHistory.pop();
+    }
+    // stores the updated city history in localStorage
+    localStorage.setItem("cityHistory", JSON.stringify(cityHistory));
+  }
+}
 
 // function that gets the coordinates from the api
 function getCoordinates(city) {
